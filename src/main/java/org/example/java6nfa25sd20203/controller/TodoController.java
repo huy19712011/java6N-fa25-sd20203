@@ -26,7 +26,7 @@ public class TodoController {
         return todoService.findById(id);
     }
 
-    @PostMapping("{id}")
+    @PostMapping
     public Todo addTodo(@RequestBody Todo todo) {
 
         return todoService.add(todo);
