@@ -3,6 +3,7 @@ package org.example.java6nfa25sd20203.controller;
 import lombok.RequiredArgsConstructor;
 import org.example.java6nfa25sd20203.entity.Todo;
 import org.example.java6nfa25sd20203.service.TodoService;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,6 +23,16 @@ public class TodoController {
         List<Todo> todos = todoService.findAll();
 
         return new ResponseEntity<>(todos, HttpStatus.OK);
+
+        //return ResponseEntity.ok(todos);
+
+        //HttpHeaders headers = new HttpHeaders();
+        //headers.add("Custom-Header", "custom-value");
+        //return new ResponseEntity<>(todos, headers, HttpStatus.OK);
+
+        //return ResponseEntity.status(HttpStatus.OK).body(todos);
+
+        //return ResponseEntity.ok().header("Custom-Header", "Custom-Value").body(todos);
     }
 
     @GetMapping("{id}")
