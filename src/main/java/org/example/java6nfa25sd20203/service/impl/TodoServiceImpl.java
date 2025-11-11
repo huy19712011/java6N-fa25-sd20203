@@ -2,6 +2,7 @@ package org.example.java6nfa25sd20203.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.example.java6nfa25sd20203.entity.Todo;
+import org.example.java6nfa25sd20203.exception.CustomResourceNotFoundException;
 import org.example.java6nfa25sd20203.repository.TodoRepository;
 import org.example.java6nfa25sd20203.service.TodoService;
 import org.springframework.stereotype.Service;
@@ -22,7 +23,9 @@ public class TodoServiceImpl implements TodoService {
 
     @Override
     public Todo findById(long id) {
-        return todoRepository.findById(id).orElse(null);
+        return todoRepository
+                .findById(id)
+                .orElseThrow(() -> new CustomResourceNotFoundException("Todo not found for this id: " + id));
     }
 
     @Override
@@ -40,7 +43,8 @@ public class TodoServiceImpl implements TodoService {
 
                     return todoRepository.save(existing);
                 })
-                .orElse(null);
+                .orElseThrow(() -> new CustomResourceNotFoundException("Todo not found for this id: " + id));
+
     }
 
     @Override
@@ -48,10 +52,16 @@ public class TodoServiceImpl implements TodoService {
 
         Todo deletedTodo = findById(id);
 
-        if (deletedTodo != null) {
-            todoRepository.deleteById(id);
-        }
+        todoRepository.deleteById(id);
 
         return deletedTodo;
+
+        //return todoRepository.findById(id)
+        //        .map(todo -> {
+        //            todoRepository.deleteById(id);
+        //            return todo;
+        //        })
+        //        .orElseThrow(() -> new CustomResourceNotFoundException("Todo not found for this id: " + id));
+
     }
 }
