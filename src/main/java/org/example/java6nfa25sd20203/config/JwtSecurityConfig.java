@@ -20,6 +20,8 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
+import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
 
 import java.security.KeyPair;
@@ -49,11 +51,14 @@ public class JwtSecurityConfig {
                 .csrf(csrfConfigurer -> csrfConfigurer.disable())
                 .authorizeHttpRequests(authorize -> {
 
-                    //authorize.requestMatchers(HttpMethod.POST, "/api/**").hasRole("ADMIN");
-                    //authorize.requestMatchers(HttpMethod.PUT, "/api/**").hasRole("ADMIN");
-                    //authorize.requestMatchers(HttpMethod.DELETE, "/api/**").hasRole("ADMIN");
                     //
-                    //authorize.requestMatchers(HttpMethod.GET, "/api/**").hasAnyRole("ADMIN", "USER", "MANAGER");
+                    authorize.requestMatchers(HttpMethod.POST, "/api/authenticate/**").hasAnyRole("USER", "ADMIN");
+
+                    authorize.requestMatchers(HttpMethod.POST, "/api/**").hasRole("ADMIN");
+                    authorize.requestMatchers(HttpMethod.PUT, "/api/**").hasRole("ADMIN");
+                    authorize.requestMatchers(HttpMethod.DELETE, "/api/**").hasRole("ADMIN");
+                    //
+                    authorize.requestMatchers(HttpMethod.GET, "/api/**").hasAnyRole("ADMIN", "USER", "MANAGER");
 
                     // for coding, testing
                     //authorize.requestMatchers(HttpMethod.GET, "/api/books").permitAll();
@@ -61,7 +66,11 @@ public class JwtSecurityConfig {
                     authorize.anyRequest().authenticated();
                 })
                 .httpBasic(Customizer.withDefaults())
-                .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.decoder(jwtDecoder)));
+                .oauth2ResourceServer(oauth2 ->
+                        oauth2.jwt(jwt -> {
+//                            jwt.decoder(jwtDecoder);
+                            jwt.jwtAuthenticationConverter(jwtAuthenticationConverter());
+                        }));
 
         return http.build();
     }
@@ -130,6 +139,19 @@ public class JwtSecurityConfig {
     public JwtEncoder jwtEncoder(JWKSource<SecurityContext> jwkSource) {
 
         return new NimbusJwtEncoder(jwkSource);
+    }
+
+    @Bean
+    public JwtAuthenticationConverter jwtAuthenticationConverter() {
+
+        JwtGrantedAuthoritiesConverter grantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
+        grantedAuthoritiesConverter.setAuthorityPrefix("");
+        grantedAuthoritiesConverter.setAuthoritiesClaimName("scope");
+
+        JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
+        jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(grantedAuthoritiesConverter);
+
+        return jwtAuthenticationConverter;
     }
 
 
